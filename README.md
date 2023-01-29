@@ -1,7 +1,7 @@
 # Module Scheduler
 
 [![Maven Central](https://img.shields.io/maven-central/v/nl.devoxist/module-scheduler.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22nl.devoxist%22%20AND%20a:%22module-scheduler%22)
-[![GitHub license](https://img.shields.io/github/license/Devoxist/module-scheduler)](https://github.com/Devoxist/module-scheduler/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/Devoxist/ModuleScheduler)](https://github.com/Devoxist/ModuleScheduler/blob/master/LICENSE)
 
 ### Getting Started
 
