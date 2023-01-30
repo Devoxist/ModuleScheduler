@@ -17,7 +17,7 @@ Add this to your `pom.xml`.
 <dependency>
     <groupId>nl.devoxist</groupId>
     <artifactId>module-scheduler</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
@@ -61,8 +61,12 @@ public class ModuleA implements Module {
 }
 ```
 
-To mark a dependency link to another module use the `@Dependency` annotation above the class of the `Module`. This
-annotation is needed to order the Modules.
+To mark a dependency to another module use the `@Dependency` annotation above the class of the `Module`. And/Or the
+dependencies can be added in a constructor. If the dependency is added in any constructor, then the annotation is not
+required and vice versa. The dependencies in the constructor and the value of the annotation need to be extended by
+the `Module` class. Only the constructor parameters that are extended by the `Module` class will be injected by the
+system, others parameters that are not extended need to be delivered by through the registers, 
+`ModuleSchedulerSettings#addRegisters`. These dependencies manipulate the order in which the modules are getting runned.
 
 ```java
 
@@ -81,15 +85,19 @@ public class ModuleB implements Module {
 }
 ```
 
-To mark a multiple dependency links to another module use the `@Dependency` annotation above the class of the `Module`.
-This annotation is needed to order the Modules.
+If a module has multiple dependencies, add the dependencies in the `@Dependency` annotation like an array. And/Or add
+the dependencies in a constructor. These dependencies can be added in multiple constructors. Like in the example below.
 
 ```java
 
 @Dependency({ModuleB.class, ModuleA.class})
 public class ModuleC implements Module {
 
-    public ModuleC(ModuleA moduleA, ModuleB moduleB) {
+    public ModuleC(ModuleA moduleA) {
+        // Put here your stuff
+    }
+
+    public ModuleC(ModuleB moduleB) {
         // Put here your stuff
     }
 

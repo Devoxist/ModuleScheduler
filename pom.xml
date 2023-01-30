@@ -29,7 +29,7 @@
     <groupId>nl.devoxist</groupId>
     <artifactId>module-scheduler</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 
     <name>Module Scheduler</name>
     <description>An API to order tasks in the correct order</description>

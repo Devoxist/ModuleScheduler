@@ -36,10 +36,10 @@ import java.util.logging.Logger;
  * This object gives the options to manipulate the process.
  *
  * @author Dev-Bjorn
- * @version 1.0.0
+ * @version 1.2.0
  * @since 1.0.0
  */
-public class ModuleSchedulerSettings {
+public final class ModuleSchedulerSettings implements Cloneable {
     /**
      * {@link Set} of modules that need to be loaded.
      *

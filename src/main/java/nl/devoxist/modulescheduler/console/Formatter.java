@@ -29,12 +29,12 @@ import java.util.logging.LogRecord;
  * {@link java.util.logging.Formatter}.
  *
  * @author Dev-Bjorn
- * @version 1.0.0
+ * @version 1.2.0
  * @see Formatter
  * @since 1.1.0
  */
-public class Formatter extends java.util.logging.Formatter {
-    
+public final class Formatter extends java.util.logging.Formatter {
+
     /**
      * Format the given log record and return the formatted string.
      * <p>

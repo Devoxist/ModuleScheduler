@@ -23,7 +23,6 @@
 package nl.devoxist.modulescheduler.resolvers;
 
 import nl.devoxist.modulescheduler.Module;
-import nl.devoxist.modulescheduler.annotation.Dependency;
 import nl.devoxist.modulescheduler.settings.ModuleInformation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +34,7 @@ import java.util.Map;
  * ({@link ModuleInformation}).
  *
  * @author Dev-Bjorn
- * @version 1.0.0
+ * @version 1.2.0
  * @since 1.0.0
  */
 public final class ModuleInformationResolver {
@@ -71,7 +70,7 @@ public final class ModuleInformationResolver {
     ) {
         ModuleInformation<?> moduleInformation = getModuleInformation(moduleCls, moduleInformationMap);
 
-        Class<? extends Module>[] dependencies = getDependencies(moduleCls);
+        Class<? extends Module>[] dependencies = DependencyRetriever.getDependencies(moduleCls);
 
         for (Class<? extends Module> dependency : dependencies) {
             addDependsOnInformation(moduleInformation, dependency, moduleInformationMap);
@@ -126,25 +125,5 @@ public final class ModuleInformationResolver {
     ) {
         ModuleInformation<?> dependentModuleInformation = getModuleInformation(dependentOfModule, moduleInformationMap);
         dependentModuleInformation.addDependsOn(moduleInformation);
-    }
-
-    /**
-     * Get the dependencies of a {@link Module} class. If the {@link Dependency} is not present on the class it will
-     * return an empty array of {@link Module} classes.
-     *
-     * @param moduleCls The class of which the dependencies are retrieved from.
-     *
-     * @return The dependencies of the given {@link Module} class. If the {@link Dependency} is not present on the class it will
-     * return an empty array of {@link Module} classes.
-     *
-     * @since 1.0.0
-     */
-    @SuppressWarnings("unchecked")
-    private static Class<? extends Module>[] getDependencies(@NotNull Class<? extends Module> moduleCls) {
-        if (!moduleCls.isAnnotationPresent(Dependency.class)) {
-            return (Class<Module>[]) new Class<?>[0];
-        }
-        Dependency dependency = moduleCls.getAnnotation(Dependency.class);
-        return dependency.value();
     }
 }

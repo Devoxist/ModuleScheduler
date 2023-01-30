@@ -35,10 +35,10 @@ import java.util.TreeMap;
  * {@link ModuleScheduler}.
  *
  * @author Dev-Bjorn
- * @version 1.0.0
+ * @version 1.2.0
  * @since 1.0.0
  */
-public class ModuleSchedulerInformation {
+public final class ModuleSchedulerInformation {
     /**
      * The settings of the current running {@link ModuleScheduler}.
      *

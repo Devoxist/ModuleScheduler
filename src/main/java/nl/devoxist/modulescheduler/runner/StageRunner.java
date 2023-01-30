@@ -37,10 +37,10 @@ import java.util.Set;
  * The process of loading the {@link Module}s.
  *
  * @author Dev-Bjorn
- * @version 1.0.0
+ * @version 1.2.0
  * @since 1.0.0
  */
-public class StageRunner extends Thread {
+public final class StageRunner extends Thread {
     /**
      * The settings of the current running {@link ModuleScheduler}.
      *
