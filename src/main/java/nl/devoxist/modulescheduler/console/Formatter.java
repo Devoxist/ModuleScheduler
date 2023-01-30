@@ -20,36 +20,37 @@
  * SOFTWARE.
  */
 
-package modules;
+package nl.devoxist.modulescheduler.console;
 
-import nl.devoxist.modulescheduler.Module;
-import nl.devoxist.modulescheduler.ModuleScheduler;
-import nl.devoxist.modulescheduler.Scheduler;
-import nl.devoxist.modulescheduler.settings.ModuleSchedulerSettings;
-import org.jetbrains.annotations.NotNull;
+import java.util.logging.LogRecord;
 
-public class ModuleSchedulerProcess implements ModuleScheduler {
-
-    public static void main(String[] args) {
-        new Scheduler(new ModuleSchedulerProcess());
-
-    }
-
+/**
+ * {@link Formatter} is used for the formatting of the logging in the console and is a subclass of
+ * {@link java.util.logging.Formatter}.
+ *
+ * @author Dev-Bjorn
+ * @version 1.0.0
+ * @see Formatter
+ * @since 1.1.0
+ */
+public class Formatter extends java.util.logging.Formatter {
+    
+    /**
+     * Format the given log record and return the formatted string.
+     * <p>
+     * The resulting formatted String will normally include a
+     * localized and formatted version of the LogRecord's message field.
+     * It is recommended to use the {@link Formatter#formatMessage}
+     * convenience method to localize and format the message field.
+     *
+     * @param record the log record to be formatted.
+     *
+     * @return the formatted log record
+     *
+     * @since 1.1.0
+     */
     @Override
-    public void updateSettings(@NotNull ModuleSchedulerSettings settings) {
-        settings.addModule(ModuleA.class);
-        settings.addModule(ModuleB.class);
-        settings.addModule(ModuleC.class);
-    }
-
-
-    @Override
-    public void beforeModuleExecute(Module module) {
-        // Put here your stuff
-    }
-
-    @Override
-    public void afterModuleExecute(Module module) {
-        // Put here your stuff
+    public String format(LogRecord record) {
+        return record.getMessage() + Console.NEWLINE;
     }
 }

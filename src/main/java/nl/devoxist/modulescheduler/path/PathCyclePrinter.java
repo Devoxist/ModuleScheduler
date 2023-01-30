@@ -22,17 +22,21 @@
 
 package nl.devoxist.modulescheduler.path;
 
+import nl.devoxist.modulescheduler.ModuleScheduler;
 import nl.devoxist.modulescheduler.console.Console;
+import nl.devoxist.modulescheduler.settings.ModuleSchedulerInformation;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The process of path resolver and printing of the {@link Path}. This is meant to be for to showcase the cycle
  * dependencies.
  *
  * @author Dev-Bjorn
- * @version 1.0.0
+ * @version 1.1.0
  * @since 1.0.0
  */
 public class PathCyclePrinter extends Thread {
@@ -42,6 +46,12 @@ public class PathCyclePrinter extends Thread {
      * @since 1.0.0
      */
     private final Path firstPath;
+    /**
+     * The information of the current running {@link ModuleScheduler}
+     *
+     * @since 1.1.0
+     */
+    private final ModuleSchedulerInformation moduleSchedulerInformation;
     /**
      * The current path of the resolver.
      *
@@ -64,11 +74,13 @@ public class PathCyclePrinter extends Thread {
     /**
      * Construct a {@link PathCyclePrinter} object that is responsible for the printing of a path cycle.
      *
-     * @param path The path that needs to be printed.
+     * @param moduleSchedulerInformation The information of the current running {@link ModuleScheduler}
+     * @param path                       The path that needs to be printed.
      *
      * @since 1.0.0
      */
-    PathCyclePrinter(Path path) {
+    PathCyclePrinter(ModuleSchedulerInformation moduleSchedulerInformation, Path path) {
+        this.moduleSchedulerInformation = moduleSchedulerInformation;
         this.path = path;
         this.firstPath = path;
 
@@ -78,12 +90,13 @@ public class PathCyclePrinter extends Thread {
     /**
      * Construct and print the cycle of {@link Path}.
      *
-     * @param path The path that needs to be printed.
+     * @param moduleSchedulerInformation The information of the current running {@link ModuleScheduler}
+     * @param path                       The path that needs to be printed.
      *
      * @since 1.0.0
      */
-    public static void printPath(Path path) {
-        PathCyclePrinter builder = new PathCyclePrinter(path);
+    public static void printPath(ModuleSchedulerInformation moduleSchedulerInformation, Path path) {
+        PathCyclePrinter builder = new PathCyclePrinter(moduleSchedulerInformation, path);
         builder.start();
         builder.print();
     }
@@ -98,8 +111,7 @@ public class PathCyclePrinter extends Thread {
     public void run() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append(Console.NEWLINE)
-                .append("[WARN] Dependency cycle detected: ");
+        builder.append("[WARN] Dependency cycle detected: ");
 
         while (path.hasPreviousPath()) {
             builder.append(Console.NEWLINE).append("[WARN]    -> %s".formatted(path.getCls().getName()));
@@ -130,7 +142,9 @@ public class PathCyclePrinter extends Thread {
         } catch (InterruptedException | ExecutionException ignored) {
             return;
         }
-        this.completableFuture.thenRun(() -> System.out.println(value)).thenRun(() -> System.exit(0));
+
+        Logger logger = this.moduleSchedulerInformation.getModuleSchedulerSettings().getLogger();
+        this.completableFuture.thenRun(() -> logger.log(Level.WARNING, value));
     }
 
 }

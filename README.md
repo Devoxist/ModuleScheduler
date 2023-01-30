@@ -17,7 +17,7 @@ Add this to your `pom.xml`.
 <dependency>
     <groupId>nl.devoxist</groupId>
     <artifactId>module-scheduler</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -122,6 +122,27 @@ order `ModuleScheduler#beforeModuleExecute` -> `Module#onExecute` -> `ModuleSche
 new Scheduler(new ModuleSchedulerProcess());
 ```
 
+#### Module Scheduler Settings
+
+#### Modules
+
+The modules which are going to be loaded can be added through the `ModuleSchedulerSettings#addModule` method. The
+modules can be added through their class path or their `Class`. 
+
+#### Input Registers
+
+The registers that are used in to construct the modules. These modules need to have a constructor with the parameters
+types registered in the input registries and/or can be the modules that are loaded. These registries can be registered
+through the `ModuleSchedulerSettings#addRegisters` method. Note: The modules that are getting loaded do not have to be
+registered in the input registers.
+
+#### Output Register
+
+This is a register that contains the constructed modules that are loaded inside the loading process.
+
+#### Logger
+
+This is the logger of the process that is going to be used to output the messages of process.
 
 ### Contributors
 

@@ -23,10 +23,14 @@
 package nl.devoxist.modulescheduler.settings;
 
 import nl.devoxist.modulescheduler.Module;
+import nl.devoxist.modulescheduler.ModuleScheduler;
+import nl.devoxist.modulescheduler.console.Formatter;
 import nl.devoxist.modulescheduler.exception.ModuleException;
 import nl.devoxist.typeresolver.register.Register;
 
 import java.util.*;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Logger;
 
 /**
  * This object gives the options to manipulate the process.
@@ -55,6 +59,25 @@ public class ModuleSchedulerSettings {
      * @since 1.0.0
      */
     private Register outputRegister = new Register();
+    /**
+     * The {@link Logger} of the current running {@link ModuleScheduler}.
+     *
+     * @see Logger
+     * @since 1.1.0
+     */
+    private Logger logger;
+
+    {
+        logger = Logger.getAnonymousLogger();
+
+        logger.setUseParentHandlers(false);
+
+        ConsoleHandler consoleHandler = new ConsoleHandler();
+        consoleHandler.setFormatter(new Formatter());
+
+        logger.addHandler(consoleHandler);
+
+    }
 
     /**
      * Add a {@link Module} to the load process. If the module is added to the process it will be used to order the
@@ -76,7 +99,7 @@ public class ModuleSchedulerSettings {
      *                   class and where that class has been implemented with {@link Module}.
      *
      * @throws ClassNotFoundException If the class was not found
-     * @throws ModuleException        If the class, that is retrieved of the path, is not extended with {@link Module}.
+     * @throws ModuleException        If the class, that is retrieved by its path, is not extended with {@link Module}.
      * @since 1.0.0
      */
     public void addModule(String modulePath) throws ClassNotFoundException {
@@ -94,7 +117,7 @@ public class ModuleSchedulerSettings {
     /**
      * Get the {@link Module}s that needs to in the load process.
      *
-     * @return The {@link Module}s that needs to be in the load process.
+     * @return An unmodifiable {@link Set} of the {@link Module}s that needs to be in the load process.
      *
      * @since 1.0.0
      */
@@ -107,6 +130,7 @@ public class ModuleSchedulerSettings {
      *
      * @param registers The registers that will be added to the {@link Set} of {@link Register}s.
      *
+     * @see Register
      * @since 1.0.0
      */
     public void addRegisters(Register... registers) {
@@ -116,8 +140,9 @@ public class ModuleSchedulerSettings {
     /**
      * Get the {@link Set} of registries that are used to construct the {@link Module}.
      *
-     * @return The {@link Set} of registries that are used to construct the {@link Module}.
+     * @return An unmodifiable {@link Set} of registries that are used to construct the {@link Module}.
      *
+     * @see Register
      * @since 1.0.0
      */
     public Set<Register> getRegistries() {
@@ -130,6 +155,7 @@ public class ModuleSchedulerSettings {
      *
      * @param outputRegister The output registry of the modules that are getting loaded.
      *
+     * @see Register
      * @since 1.0.0
      */
     public void setOutputRegister(Register outputRegister) {
@@ -140,12 +166,37 @@ public class ModuleSchedulerSettings {
      * Get the output registery of the module scheduler. This will contain all the loaded modules after the
      * modules are loaded.
      *
-     * @return The output registery of the module scheduler.
+     * @return The cloned output registery of the module scheduler.
      *
+     * @see Register
      * @since 1.0.0
      */
     public Register getOutputRegister() {
         return this.outputRegister.clone();
+    }
+
+    /**
+     * Set the {@link Logger} of the current running {@link ModuleScheduler}.
+     *
+     * @param logger The {@link Logger} of the current running {@link ModuleScheduler}
+     *
+     * @see Logger
+     * @since 1.1.0
+     */
+    public void setLogger(Logger logger) {
+        this.logger = logger;
+    }
+
+    /**
+     * Get the {@link Logger} of the current running {@link ModuleScheduler}.
+     *
+     * @return The {@link Logger} of the current running {@link ModuleScheduler}
+     *
+     * @see Logger
+     * @since 1.1.0
+     */
+    public Logger getLogger() {
+        return logger;
     }
 
     /**

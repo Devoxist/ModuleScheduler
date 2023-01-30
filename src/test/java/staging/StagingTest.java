@@ -38,6 +38,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Handler;
 
 public class StagingTest {
 
@@ -53,7 +54,7 @@ public class StagingTest {
     }
 
     @Test
-    public void stageSortTest2() {
+    public void stageSortTest2() throws InterruptedException {
         ModuleSchedulerSettings schedulerSettings = new ModuleSchedulerSettings();
         ModuleSchedulerInformation schedulerInformation = new ModuleSchedulerInformation(schedulerSettings);
 
@@ -75,7 +76,7 @@ public class StagingTest {
     }
 
     @Test
-    public void stageSortTest3() {
+    public void stageSortTest3() throws InterruptedException {
         ModuleSchedulerSettings schedulerSettings = new ModuleSchedulerSettings();
         ModuleSchedulerInformation schedulerInformation = new ModuleSchedulerInformation(schedulerSettings);
 
@@ -108,7 +109,7 @@ public class StagingTest {
     }
 
     @Test
-    public void stageSortTest4() {
+    public void stageSortTest4() throws InterruptedException {
         ModuleSchedulerSettings schedulerSettings = new ModuleSchedulerSettings();
         ModuleSchedulerInformation schedulerInformation = new ModuleSchedulerInformation(schedulerSettings);
 
@@ -149,6 +150,48 @@ public class StagingTest {
         Assertions.assertEquals(moduleInformationC, stageC.moduleInformation());
     }
 
+    @Test
+    public void stageSortCycleTest() {
+        ModuleSchedulerSettings schedulerSettings = new ModuleSchedulerSettings();
+        ModuleSchedulerInformation schedulerInformation = new ModuleSchedulerInformation(schedulerSettings);
+
+        for (Handler handler : schedulerInformation.getModuleSchedulerSettings().getLogger().getHandlers()) {
+            schedulerSettings.getLogger().removeHandler(handler);
+        }
+
+        Map<Class<? extends Module>, ModuleInformation<?>> moduleInformationMap =
+                new TreeMap<>(Comparator.comparing(Class::getName));
+
+        schedulerInformation.setModuleInformationMap(moduleInformationMap);
+
+        ModuleInformationResolver.resolveInformation(
+                ModuleA.class,
+                moduleInformationMap
+        );
+
+        ModuleInformationResolver.resolveInformation(
+                ModuleC.class,
+                moduleInformationMap
+        );
+
+        ModuleInformationResolver.resolveInformation(
+                ModuleB.class,
+                moduleInformationMap
+        );
+
+        ModuleInformationResolver.resolveInformation(
+                ModuleD.class,
+                moduleInformationMap
+        );
+
+        ModuleInformationResolver.resolveInformation(
+                ModuleE.class,
+                moduleInformationMap
+        );
+
+        Assertions.assertThrows(InterruptedException.class, () -> Staging.stageModules(schedulerInformation));
+    }
+
     public static class ModuleA implements Module {
 
         @Override
@@ -174,6 +217,32 @@ public class StagingTest {
     public static class ModuleC implements Module {
 
         public ModuleC(ModuleA moduleA, ModuleB moduleB) {
+
+        }
+
+        @Override
+        public void onExecute() {
+
+        }
+    }
+
+    @Dependency({ModuleC.class, ModuleE.class})
+    public static class ModuleD implements Module {
+
+        public ModuleD(ModuleC moduleC, ModuleE moduleE) {
+
+        }
+
+        @Override
+        public void onExecute() {
+
+        }
+    }
+
+    @Dependency({ModuleC.class, ModuleD.class})
+    public static class ModuleE implements Module {
+
+        public ModuleE(ModuleC moduleC, ModuleD moduleD) {
 
         }
 

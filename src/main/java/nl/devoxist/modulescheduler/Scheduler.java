@@ -89,16 +89,20 @@ public final class Scheduler {
      * @since 1.0.0
      */
     private void run() {
-        this.moduleScheduler.updateSettings(this.moduleSchedulerSettings);
+        try {
+            this.moduleScheduler.updateSettings(this.moduleSchedulerSettings);
 
-        Set<Class<? extends Module>> modules = this.moduleSchedulerSettings.getModules();
-        Map<Class<? extends Module>, ModuleInformation<?>>
-                moduleInformationSet = DependencyResolver.resolveDependencies(modules);
+            Set<Class<? extends Module>> modules = this.moduleSchedulerSettings.getModules();
+            Map<Class<? extends Module>, ModuleInformation<?>>
+                    moduleInformationSet = DependencyResolver.resolveDependencies(modules);
 
-        this.moduleSchedulerInformation.setModuleInformationMap(moduleInformationSet);
-        Set<Stage> stages = Staging.stageModules(this.moduleSchedulerInformation);
+            this.moduleSchedulerInformation.setModuleInformationMap(moduleInformationSet);
 
-        StageRunner.runStages(this.moduleSchedulerSettings, this.moduleScheduler, stages);
+            Set<Stage> stages = Staging.stageModules(this.moduleSchedulerInformation);
+
+            StageRunner.runStages(this.moduleSchedulerSettings, this.moduleScheduler, stages);
+        } catch (InterruptedException ignored) {
+        }
     }
 
 }

@@ -23,12 +23,19 @@
 package settings;
 
 import modules.ModuleA;
+import nl.devoxist.modulescheduler.console.Formatter;
 import nl.devoxist.modulescheduler.exception.ModuleException;
 import nl.devoxist.modulescheduler.settings.ModuleSchedulerSettings;
 import nl.devoxist.typeresolver.register.Register;
 import org.jetbrains.annotations.TestOnly;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Logger;
 
 @TestOnly
 public class ModuleSchedulerSettingsTest {
@@ -134,6 +141,37 @@ public class ModuleSchedulerSettingsTest {
         ModuleSchedulerSettings moduleSchedulerSettings = new ModuleSchedulerSettings();
 
         Assertions.assertNotNull(moduleSchedulerSettings.getOutputRegister());
+    }
+
+
+    @Test
+    public void constructLoggerTest() {
+        ModuleSchedulerSettings moduleSchedulerSettings = new ModuleSchedulerSettings();
+
+        Assertions.assertNotNull(moduleSchedulerSettings.getLogger());
+
+        Assertions.assertFalse(moduleSchedulerSettings.getLogger().getUseParentHandlers());
+
+        Handler[] handlers = moduleSchedulerSettings.getLogger().getHandlers();
+        List<Handler> handlerList = Arrays.asList(handlers);
+
+        Assertions.assertFalse(handlerList.isEmpty());
+        Assertions.assertEquals(1, handlerList.size());
+
+
+        Handler handler = handlerList.get(0);
+        Assertions.assertTrue(handler instanceof ConsoleHandler);
+        Assertions.assertTrue(handler.getFormatter() instanceof Formatter);
+    }
+
+    @Test
+    public void setLoggerTest() {
+        ModuleSchedulerSettings moduleSchedulerSettings = new ModuleSchedulerSettings();
+        Logger logger = Logger.getLogger("TestSettingsLogger");
+
+        moduleSchedulerSettings.setLogger(logger);
+
+        Assertions.assertEquals(logger, moduleSchedulerSettings.getLogger());
     }
 
 

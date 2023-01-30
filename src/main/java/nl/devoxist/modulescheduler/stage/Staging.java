@@ -60,6 +60,12 @@ public final class Staging {
      * @since 1.0.0
      */
     private boolean zeroOrFirstStageOccupied = false;
+    /**
+     * The information of the current {@link ModuleScheduler}.
+     *
+     * @since 1.1.0
+     */
+    private ModuleSchedulerInformation moduleSchedulerInformation;
 
     /**
      * Update the {@link #stages} to create the load order of the {@link Module}s.
@@ -68,11 +74,13 @@ public final class Staging {
      *
      * @return The unmodifiable {@link Set} of {@link Module}s that is in the correct load order.
      *
-     * @throws ModuleException If the zeroth or first stage is not occupied.
+     * @throws ModuleException      If the zeroth or first stage is not occupied.
+     * @throws InterruptedException If there is a dependency cycle detected.
      * @see ModuleInformation
      * @since 1.0.0
      */
-    public static @NotNull @UnmodifiableView Set<Stage> stageModules(ModuleSchedulerInformation moduleSchedulerInformation) {
+    public static @NotNull @UnmodifiableView Set<Stage> stageModules(ModuleSchedulerInformation moduleSchedulerInformation)
+            throws InterruptedException {
         Set<Stage> stageSet = new Staging().stageModule(moduleSchedulerInformation);
         return Collections.unmodifiableSet(stageSet);
     }
@@ -85,11 +93,15 @@ public final class Staging {
      *
      * @return The {@link Set} of {@link Module}s that is in the correct load order.
      *
-     * @throws ModuleException If the zeroth or first stage is not occupied.
+     * @throws ModuleException      If the zeroth or first stage is not occupied.
+     * @throws InterruptedException If there is a dependency cycle detected.
      * @see ModuleInformation
      * @since 1.0.0
      */
-    private Set<Stage> stageModule(@NotNull ModuleSchedulerInformation moduleSchedulerInformation) {
+    private Set<Stage> stageModule(@NotNull ModuleSchedulerInformation moduleSchedulerInformation)
+            throws InterruptedException {
+        this.moduleSchedulerInformation = moduleSchedulerInformation;
+
         Map<Class<? extends Module>, ModuleInformation<?>> moduleInformationMap =
                 moduleSchedulerInformation.getModuleInformationMap();
 
@@ -111,10 +123,12 @@ public final class Staging {
      *
      * @param moduleInformationMap The map of {@link Module}s with their information.
      *
+     * @throws InterruptedException If there is a dependency cycle detected.
      * @see ModuleInformation
      * @since 1.0.0
      */
-    private void createStages(@NotNull Map<Class<? extends Module>, ModuleInformation<?>> moduleInformationMap) {
+    private void createStages(@NotNull Map<Class<? extends Module>, ModuleInformation<?>> moduleInformationMap)
+            throws InterruptedException {
         for (ModuleInformation<?> moduleInformation : moduleInformationMap.values()) {
             if (isZeroStage(moduleInformation) && addStage(0, moduleInformation)) {
                 zeroOrFirstStageOccupied = true;
@@ -138,6 +152,8 @@ public final class Staging {
      * @param stageNumber       The number of the stage.
      * @param moduleInformation The information of the {@link Module}.
      *
+     * @return If {@code true} the module is added to the staging process and can be loaded during the running process.
+     *
      * @since 1.0.0
      */
     private boolean addStage(int stageNumber, ModuleInformation<?> moduleInformation) {
@@ -153,7 +169,7 @@ public final class Staging {
             return true;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -253,9 +269,10 @@ public final class Staging {
          *
          * @param firstModule The {@link Module} that is in the first stage and will be resolved.
          *
+         * @throws InterruptedException If there is a dependency cycle detected.
          * @since 1.0.0
          */
-        HigherStageUpdater(@NotNull ModuleInformation<?> firstModule) {
+        HigherStageUpdater(@NotNull ModuleInformation<?> firstModule) throws InterruptedException {
             previousPath.setCls(firstModule.getModule());
             previousPath.setNextPath(path);
             pathing.add(firstModule);
@@ -269,17 +286,15 @@ public final class Staging {
          *
          * @param startingModule The module where the process starts or the loading module that needs to be resolved.
          *
+         * @throws InterruptedException If there is a dependency cycle detected.
          * @since 1.0.0
          */
-        private void resolve(@NotNull ModuleInformation<?> startingModule) {
+        private void resolve(@NotNull ModuleInformation<?> startingModule) throws InterruptedException {
             ++stageNumber;
             updatePath(startingModule);
 
             for (ModuleInformation<?> loadingModule : startingModule.getDependsOn()) {
-                if (isCycle(loadingModule)) {
-                    break;
-                }
-
+                isCycle(loadingModule);
                 Staging.this.addStage(stageNumber, loadingModule);
                 resolve(loadingModule);
             }
@@ -295,18 +310,17 @@ public final class Staging {
          *
          * @param loadingModule The loading {@link Module} that needs to be checked.
          *
-         * @return If {@code true} the loading {@link Module} is in a cycle.
-         *
+         * @throws InterruptedException If there is a dependency cycle detected.
          * @since 1.0.0
          */
-        private boolean isCycle(ModuleInformation<?> loadingModule) {
-            if (!pathing.add(loadingModule)) {
-                path.setCls(loadingModule.getModule());
-                PathCyclePrinter.printPath(path);
-                return true;
+        private void isCycle(ModuleInformation<?> loadingModule) throws InterruptedException {
+            if (pathing.add(loadingModule)) {
+                return;
             }
 
-            return false;
+            path.setCls(loadingModule.getModule());
+            PathCyclePrinter.printPath(Staging.this.moduleSchedulerInformation, path);
+            throw new InterruptedException();
         }
 
         /**
